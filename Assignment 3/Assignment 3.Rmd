@@ -1,0 +1,92 @@
+---
+title: "Assignment "
+output: html_document
+---
+                         Module 6 - The Transportation Model
+Heart Start produces automated external defibrillators (AEDs) in each of two different plants (A and B). The unit production costs and monthly production capacity of the two plants are indicated in the table below. The AEDs are sold through three wholesalers. The shipping cost from each plant to the warehouse of each wholesaler along with the monthly demand from each wholesaler are also indicated in the table. How many AEDs should be produced in each plant, and how should they be distributed to each of the three wholesaler warehouses so as to minimize the combined cost of production and shipping?
+
+
+1. Formulate and solve this transportation problem using R
+2. Formulate the dual of this transportation problem
+3. Make an economic interpretation of the dual
+
+```{r}
+tab <- matrix(c(22,14,30,0,16,20,24,0), ncol = 4,byrow = TRUE)
+# Set customers and suppliers' names
+colnames(tab) <- c("Warehouse 1", "Warehouse 2", "Warehouse 3","Dummy")
+rownames(tab) <- c("Plant A", "Plant B")
+tab
+```
+
+The above transportation problem can be formulated in the LP format as below:
+
+Min TC = 22x11 + 14x12 + 30x13 
+        +16x21 + 20x22 + 24x23
+        
+        
+Subject to          
+Production Capacity        
+       x11 + x12 + x13  ≤ 100
+       x21 + x22 + x23  ≤ 120
+
+Demand constrain
+      x11 + x21  ≥ 80
+      x21 + x22  ≥ 60
+      x21 + x22  ≥ 70
+
+Non-negativity of the variables
+            xij ≥ 0
+          
+where
+            i = 1,2,3
+and 
+            j = 1,2
+ 
+
+
+This transportation problem is unbalanced one (demand is not equal to supply), that is demand is less than supply by 10,
+so I create a dummy variable in column 4 with transportation cost zero and demand 10
+
+```{r}
+library(lpSolve)
+# Set up cost matrix
+costs <- matrix(c(22,14,30,0,16,20,24,0), ncol = 4,byrow = TRUE)
+# Set customers and suppliers' names
+colnames(costs) <- c("Warehouse 1", "Warehouse 2", "Warehouse 3","Dummy")
+rownames(costs) <- c("Plant A", "Plant B")
+costs
+```
+
+
+```{r}
+# Set up constraint signs and right-hand sides (supply side)
+row.signs <- rep("<=", 2)
+row.rhs <- c(100,120)
+#Demand (sinks) side constraints
+col.signs <- rep(">=", 4)
+col.rhs <- c(80,60,70,10)
+```
+
+
+
+```{r}
+# Run
+lptrans <- lp.transport(costs, "min", row.signs, row.rhs, col.signs, col.rhs)
+#Values of all 9 variables
+lptrans$solution
+```
+
+
+```{r}
+# Value of the objective function
+lptrans$objval
+```
+
+When solved the transportation problem, I got the values of the variables as
+x11 = 30
+x12 = 50
+x21 = 60
+x32 = 70
+
+
+The minimized value of the transportation cost is 3980
