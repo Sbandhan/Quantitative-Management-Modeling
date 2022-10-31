@@ -1,0 +1,231 @@
+---
+title: "Assignment 4"
+output:
+  pdf_document: default
+  html_document: default
+date: '2022-10-30'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+                                            
+                                            
+                                            Module 8 - DEA
+                                  Hope Valley Health Care Association
+The Hope Valley Health Care Association owns and operates six nursing homes in adjoining states. An evaluation of their efficiency has been undertaken using two inputs and two outputs. The inputs are staffing labor (measured in average hours per day) and the cost of supplies (in thousands of dollars per day). The outputs are the number of patient-days reimbursed by third- party sources and the number of patient-days reimbursed privately. A summary of performance data is shown in the table below.
+```{r}
+library(Benchmarking)
+library(lpSolveAPI)
+```
+##We used vectors to represent our inputs and outputs. we have 2 inputs (Staff hours, Supplies) and 2 outputs (“Reimbursed Patient_Days”,"Privately Paid Patient_Day) .
+
+```{r}
+x <- matrix(c(150, 400, 320, 520, 350, 320, 0.2, 0.7, 1.2, 2.0, 1.2, 0.7), ncol = 2)
+y <- matrix(c(14000,14000,42000,28000,19000,14000,3500,21000,10500,42000,25000,15000),ncol = 2)
+colnames(y) <- c("Reimbursed Patient_Days","Privately Paid Patient_Days")
+colnames(x) <- c("Staff_Hours", "Supplies")
+Table<- cbind(x,y)
+row.names(Table) = c("F1", "F2", "F3", "F4", "F5", "F6")
+Table
+```
+
+## DEA Analysis using all of the DEA assumptions (FDH, CRS, VRS, IRS, DRS, and FRH)
+```{r}
+CRS <- dea(x,y, RTS = "crs") 
+print(CRS) 
+```
+## CRS - The efficiency rates for facilities 1, 2, 3, and 4 are high, whereas those for facilities 5 and 6 are 98% and 87%, respectively.
+```{r}
+peers(CRS)
+```
+```{r}
+CRS_Weights <- lambda(CRS) 
+CRS_Weights
+```
+# The weights for facility 5 are 0.20, 0.08, 0.54. The weights for facility 6 are 0.34, 0.39, 0.13
+```{r}
+#Plotting the results
+dea.plot(x,y,RTS="crs", main="Constant Returns to Scale  (CRS) Graph")
+```
+
+
+```{r}
+FDH <- dea(x,y, RTS= "fdh")
+FDH #All of the facilities are effective.
+```
+
+```{r}
+peers(FDH) #Each facility's peer is its own.
+```
+```{r}
+FDH_Weights <- lambda(FDH)
+FDH_Weights
+```
+```{r}
+# Plotting the results
+dea.plot(x,y,RTS="fdh", main="Free disposability hull (FDH) Graph")
+```
+
+```{r}
+VRS <- dea(x,y, RTS = "vrs")
+VRS #Except for facility 6, all facilities are effective.
+```
+
+```{r}
+peers(VRS) #peers for facility 6 are 1,2,5
+```
+
+```{r}
+VRS_Weights <- lambda(VRS)
+VRS_Weights
+```
+```{r}
+# Plotting the results
+dea.plot(x,y,RTS="vrs", main="Variable Returns to Scale (VRS) Graph")
+
+```
+
+```{r}
+IRS <- dea(x,y, RTS= "irs")
+IRS #Except for facility, all facilities are efficient.
+```
+
+
+```{r}
+peers(IRS)
+```
+```{r}
+IRS_Weights <- lambda(IRS)
+IRS_Weights
+```
+```{r}
+# Plotting the results
+dea.plot(x,y,RTS="irs",  main="Increasing  Returns  to  Scale  (IRS) Graph")
+
+```
+```{r}
+DRS <- dea(x,y, RTS= "drs") 
+DRS #Except for facility 5,6, all facilities are efficient.
+```
+```{r}
+peers(DRS) # The peers units for for facilities 5,6 are 1,2,4
+```
+
+```{r}
+DRS_Weights <- lambda(DRS)
+DRS_Weights
+```
+```{r}
+# Plotting the results
+dea.plot(x,y,RTS="drs", main="Decreasing Returns to Scale (DRS) Graph")
+```
+
+
+```{r}
+FRH <- dea(x,y, RTS= "add")
+FRH #Every facility is effective.
+```
+```{r}
+peers(FRH) #Each facility's peer unit is itself.
+```
+```{r}
+FRH_Weights <- lambda(FRH)
+FRH_Weights
+```
+```{r}
+# Plot the results
+dea.plot(x,y,RTS="add", main="Free Replicability Hull (FRH) Graph")
+
+```
+
+```{r}
+as.data.frame(Table)
+```
+# Plot of different technologies
+```{r}
+library(Benchmarking)
+x <- matrix(c(150, 400, 320, 520),ncol=1,dimnames=list(LETTERS[1:4],"x"))
+y <- matrix(c(14000,14000,42000,28000),ncol=1,dimnames=list(LETTERS[1:4],"y"))
+dea.plot(x,y,RTS="vrs",ORIENTATION="in-out",txt=rownames(x))
+dea.plot(x,y,RTS="drs",ORIENTATION="in-out",add=TRUE,lty="dashed",lwd=2)
+dea.plot(x,y,RTS="irs",ORIENTATION="in-out",add=TRUE,lty="dotted",lwd=3)
+dea.plot(x,y,RTS="crs",ORIENTATION="in-out",add=TRUE,lty="dotted",lwd=4, col="blue")
+
+
+dea.plot(x,y,RTS="fdh",ORIENTATION="in-out",txt=rownames(x),main="fdh")
+
+dea.plot(x,y,RTS="fdh+",ORIENTATION="in-out",add=TRUE,lty="dotted",param=.5)
+```
+```{r}
+# Plot of different technologies
+
+library(Benchmarking)
+x <- matrix(c(100,200,300,500),ncol=1,dimnames=list(LETTERS[1:4],"x"))
+y <- matrix(c(75,100,300,400),ncol=1,dimnames=list(LETTERS[1:4],"y"))
+dea.plot(x,y,RTS="vrs",ORIENTATION="in-out",txt=rownames(x))
+dea.plot(x,y,RTS="drs",ORIENTATION="in-out",add=TRUE,lty="dashed",lwd=2)
+dea.plot(x,y,RTS="irs",ORIENTATION="in-out",add=TRUE,lty="dotted",lwd=3)
+dea.plot(x,y,RTS="crs",ORIENTATION="in-out",add=TRUE,lty="dotted",lwd=4, col="blue")
+
+
+dea.plot(x,y,RTS="fdh",ORIENTATION="in-out",txt=rownames(x),main="fdh")
+
+dea.plot(x,y,RTS="fdh+",ORIENTATION="in-out",add=TRUE,lty="dotted",param=.5)
+```
+
+
+#3. Summarize your results in a tabular format
+
+```{r}
+df<-data.frame (CRS = c(1.0000, 1.0000, 1.0000, 1.0000, 0.9775, 0.8675),
+FDH= c(1,1,1,1,1,1), VRS= c(1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.8963),IRS =c( 1.0000, 1.0000, 1.0000, 1.0000, 1.0000 ,0.8963), DRS= c(1.0000 ,1.0000 ,1.0000, 1.0000, 0.9775, 0.8675), FRH= c(1,1,1,1,1,1))
+
+df
+```
+#In each DEA assumption, the efficiency results at each facility
+
+#Observation - CRS and DRS give same results, FDH and FRH gave same results, and finally both VRS and IRS gave same results as well.
+
+```{r}
+results <- cbind(Table, df)
+results[,-c(1:4)]
+```
+#4. Compare and contrast the above results
+#Compare between different assumptions
+
+```{r}
+dea.plot(x,y,RTS="fdh", main="Free disposability hull (FDH) Graph")
+
+dea.plot(x,y,RTS="vrs", main="Variable Returns to Scale (VRS) Graph")
+
+dea.plot(x,y,RTS="drs", main="Decreasing Returns to Scale (DRS) Graph")
+
+dea.plot(x,y,RTS="irs",  main="Increasing  Returns  to  Scale  (IRS)  Graph")
+
+dea.plot(x,y,RTS="crs", main="Constant Returns to Scale (CRS) Graph")
+
+dea.plot(x,y,RTS="add", main="Free Replicability Hull (FRH) Graph")
+
+```
+
+
+#A summary of the weights assigned to each Facility in each DEA assumption
+```{r}
+Weights_tbl <- cbind(FDH_Weights, CRS_Weights, VRS_Weights, IRS_Weights, DRS_Weights, FRH_Weights)
+
+row.names(Weights_tbl) <-   c("F1", "F2", "F3", "F4", "F5", "F6")
+
+colnames(Weights_tbl) <- c("FDH" ,"FDH", "FDH", "FDH","FDH","FDH", "CRS", "CRS", "CRS", "CRS", "VRS", "VRS", "VRS","VRS", "VRS", "IRS", "IRS", "IRS", "IRS","IRS", "DRS", "DRS", "DRS", "DRS", "FRH", "FRH", "FRH", "FRH", "FRH","FRH") 
+
+as.data.frame(Weights_tbl)   
+```
+
+# The above table summarizes the weights  for each facility under each DEA assumption
+# Summary 
+# All facilities are efficient under FDH and FRH.
+# Except for Facility 5,6, all facilities were efficient under CRS and DRS.
+# Except for facility 6, all were efficient under VRS and IRS assumptions.
+# They are peer units for efficient facilities.
+# IN the VRS and IRS assumptions for inefficient facilities were 1, 2, and 5. 
+# The peer units under CRS and DRS were 1, 2, and 4.
