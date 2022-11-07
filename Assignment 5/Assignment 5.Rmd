@@ -1,0 +1,83 @@
+---
+title: "Assignment  5"
+output:
+  html_document: default
+  pdf_document: default
+date: "2022-11-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+                    Module 9 - Goal Programming
+
+The Research and Development Division of the Emax Corporation has developed three new products. A decision now needs to be made on which mix of these products should be produced. Management wants primary consideration given to three factors: total profit, stability in the workforce, and achieving an increase in the company’s earnings next year from the $75 million achieved this year. In particular, using the units given in the following table, they want to
+#Maximize Z = P - 6C - 3D, where
+#P = total (discounted) profit over the life of the new products,
+#C = change (in either direction) in the current level of employment,
+#D = decrease (if any) in next year’s earnings from the current year’s level. 
+#The amount of any increase in earnings does not enter into Z, because management is concerned primarily with just achieving some increase to keep the stockholders happy. (It has mixed feelings about a large increase that then would be difficult to surpass in subsequent years.)
+
+## 1. Define y1+ and y1-, respectively, as the amount over (if any) and the amount under (if any) the employment level goal. Define y2+ and y2- in the same way for the goal regarding earnings next year. Define x1, x2, and x3 as the production rates of Products 1, 2, and 3, respectively. With these definitions, use the goal programming technique to express y1+,y1-, y2+ and y2- algebraically in terms of x1, x2, and x3. Also express P in terms of x1, x2, and x3.
+
+### Answer - 
+
+### y1 = y1p - y1m =  6 x1 + 4 x2 + 5 x3 - 50
+### y2 = y2p - y2m =8 x1 + 7 x2 +5 x3 - 75
+### P = 20 x1 + 15 x2 + 25 x3
+
+#### y1p is exceeding the employment level objective, and the weighted penalty is 6
+#### y1m is exceeding the employment level objective, and the weighted penalty is 6 
+#### y2p is exceeding the earnings target for next year with no penalty
+#### y2m is falling short of next year's earnings target, and the penalty is 3.
+
+#### x1 is the quantity of product 1 that will be manufactured
+#### x2 is the quantity of product 2 that will be manufactured
+#### x3 is the quantity of product 3 that will be manufactured
+
+### 2. Express management’s objective function in terms of x1, x2, x3, y1+, y1-, y2+ and y2-.
+```{r}
+library(lpSolveAPI)
+# Loading the data
+emax <-  read.lp("Emax.lp")
+emax
+```
+### Answer -  Objective function
+### max Z: 20x1 + 15x2 + 25x3 - 6 y1p - 6 y1m - 3 y2m
+
+### 3.  Formulate and solve the linear programming model. What are your findings?
+
+### Answer -
+```{r}
+library(lpSolveAPI)
+
+# Loading the data
+emax <-  read.lp("Emax.lp")
+emax
+```
+
+### Objective Function - maxZ: 20x1 + 15x2 + 25x3 - 6 y1p - 6 y1m - 3 y2m
+
+### Constraints 
+### 6x1 + 4x2 + 5x3 - y1p + y1m = 50
+### 8x1 + 7x2 + 5x3 - y2p + y2m + 75
+### x1, x2, x3, y1p, y1m, y2p, y2m >=0
+
+
+```{r}
+Emax <- read.lp("Emax.lp")
+solve(Emax)
+```
+
+```{r}
+get.objective(Emax)
+```
+
+```{r}
+get.variables(Emax)
+get.constraints(Emax)
+```
+### Z = 225
+###This is the order in which the variables for the objective function were written. In our case, the outcomes are as follows:
+### x1 = 0, x2 = 0, x3 = 15, y1p = 25, y1m = 0, y2m = 0 and it clearly satisfies all the  expectations.
+
