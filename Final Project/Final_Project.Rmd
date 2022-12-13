@@ -1,0 +1,40 @@
+---
+title: "QMM Final Project"
+author: "Sharik Baig, Sai Venkata, Rajiv Reddy"
+date: "12/10/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Constraints
+
+The Task is to assign 12 students to 4 groups with not more than 3 students in each group.
+
+Hence we have considered 3 major factors that is very important for best group distribution.
+
+Student's GPA - Considering the example that GPA 3 is a good GPA hence we have taken sum of GPA for each group should be >= 9.0
+Student's Attendance - Considering the example that attendance should be atleast 60% hence we have taken sum of attendance for each group should be >= 180.0
+Student's grade from Discussion Post - Considering the example that avg grade from discussion post should be atleast 70% hence we have taken sum of grade from discussion post for each group should be >= 210.0
+
+```{r students}
+library(lpSolveAPI)
+StuGroup <- read.lp("C:/Users/shari/OneDrive/Desktop/Business Analytics/QMM/QMM_Project_Group6/Group.lp")
+StuGroup
+solve(StuGroup)
+get.objective(StuGroup)
+get.variables(StuGroup)
+get.constraints(StuGroup)
+```
+
+## Group Allocation
+
+Looking at the output below is the group allocation
+
+Group1 - Student3, Student6, Student9.
+Group2 - Student5, Student8, Student10.
+Group3 - Student4, Student7, Student1.
+Group4 - Student2, Student11, Student12.
+
